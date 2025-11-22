@@ -1,45 +1,67 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import './global.css';
+import { NavigationContainer } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AuthProvider } from './src/Services/Authentication/AuthContext/AuthContext';
+import { useContext, useEffect, useState } from 'react';
+import { AuthContext } from './src/Services/Authentication/AuthContext/AuthContext';
+import CleanerRoutes from './src/Cleaner/Routes/CleanerRoutes';
+import LoginRoutes from './src/Login/Routes/LoginRoutes';
+import OperatorRoutes from './src/OperationLead/Routes/OperatorRoutes';
+import AlterScreen from './src/Utilites/AlertScreen/AlertScreen';
+import InternetChecker from './src/Utilites/InternetChecker/InternetChecker';
+import { Role } from './src/Utilites/enums/EnumsRole';
+import Loader from './src/Ui/Loader/Loader';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+type user = {
+  id: string;
+  role: string;
+  userName: string;
+  dateOfBirth: string;
+  email: string;
+  fullName: string;
+  isFullTime: number;
+  mobileNo: string;
+  userPicturePath: string;
+};
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+function Main() {
+  const Auth = useContext(AuthContext);
+
+  const roles = Auth?.UserRole;
+
+  if (Auth?.loading) {
+    return <Loader />;
+  }
+  console.log(!Auth?.Token == null || !roles == null, 'ASDFASDFASDFAS');
+  if (Auth?.Token == null || roles == null) {
+    return (
+      <NavigationContainer>
+        <LoginRoutes />
+        {/* <OperatorRoutes /> */}
+      </NavigationContainer>
+    );
+  }
+
+  if (roles == Role.ADMIN) return <AlterScreen />;
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <NavigationContainer>
+      {roles == Role.CLEANER ? (
+        <CleanerRoutes />
+      ) : (
+        roles == Role.OPERATIONAL_LEAD && <OperatorRoutes />
+      )}
+    </NavigationContainer>
   );
 }
 
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
+export default function App() {
   return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
+    <AuthProvider>
+      <SafeAreaProvider>
+        <InternetChecker />
+        <Main />
+      </SafeAreaProvider>
+    </AuthProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
-export default App;

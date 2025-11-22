@@ -1,0 +1,5 @@
+export enum Role {
+    ADMIN ="ADMIN",
+    CLEANER = "CLEANER",
+    OPERATIONAL_LEAD = "OPERATIONAL_LEAD"
+ }
